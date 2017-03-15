@@ -16,5 +16,10 @@ module.exports = {
     id: { type: Number, required: true },
     img: { type: String, required: true },
     url: { type: String }
+  },
+  Category: {
+    id: { type: Number, required: true },
+    text: { type: String, required: true },
+    icon: { type: String, required: true }
   }
 };

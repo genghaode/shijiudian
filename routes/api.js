@@ -43,4 +43,14 @@ router.post('/postLogin', function(req, res) {
   })
 });
 
+router.get('/getCategoryData', function(req, res, next) {
+  Model('Category').find({}).sort({ id: 1 }).exec(function(err, category) {
+    if (category.length) {
+      res.json({ myData: category, status: true });
+    } else {
+      res.json({ myData: category, status: false });
+    }
+  })
+});
+
 module.exports = router;
