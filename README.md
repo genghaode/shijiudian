@@ -7,7 +7,7 @@
 - 移动端：react-native
 - 微信小程序
 
-## 手机站：开发中 [m.shijiudian.com](m.shijiudian.com)
+## 手机站：开发中 m.shijiudian.com
 
 ## pc内容管理站：未开发
 

@@ -2,7 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
 <svg xmlns="http://www.w3.org/2000/svg">
 <metadata>
-Created by FontForge 20120731 at Sun Mar  5 07:24:41 2017
+Created by FontForge 20120731 at Mon Mar 13 16:14:13 2017
  By admin
 </metadata>
 <defs>
@@ -19,7 +19,7 @@ Created by FontForge 20120731 at Sun Mar  5 07:24:41 2017
     bbox="44 -66 962.526 832.5"
     underline-thickness="0"
     underline-position="0"
-    unicode-range="U+0078-E7B1"
+    unicode-range="U+0078-E8D4"
   />
 <missing-glyph 
  />
@@ -80,5 +80,8 @@ d="M896 294v177q64 62 64 150q0 86 -61 147t-147 61t-147 -61h-183q-62 64 -150 64q-
 t42 -102t-42 -101.5t-102 -42t-102 42t-42 101.5t42 102t102 42.5zM272.5 768q59.5 0 101.5 -42.5t42 -102t-42 -101.5t-101.5 -42t-102 42t-42.5 101.5t42.5 102t102 42.5zM272.5 0q-59.5 0 -102 42.5t-42.5 102t42.5 101.5t102 42t101.5 -42t42 -101.5t-42 -102
 t-101.5 -42.5zM464 64q16 38 16 80q0 86 -61 147t-147 61q-42 0 -80 -16v96q38 -16 80 -16q86 0 147 61t61 147q0 42 -16 80h97q-17 -40 -17 -83q0 -86 61 -147t147 -61q42 0 80 16v-93q-38 16 -80 16q-86 0 -147 -61t-61 -147q0 -42 16 -80h-96zM752 0q-60 0 -102 42.5
 t-42 102t42 101.5t102 42t102 -42t42 -101.5t-42 -102t-102 -42.5z" />
+    <glyph glyph-name="xianshikejian" unicode="&#xe8d4;" 
+d="M512 640q-126 0 -234.5 -72t-149.5 -184q41 -112 149.5 -184t234.5 -72t235 72t150 184q-41 112 -150 184t-235 72zM512 224q-66 0 -113 47t-47 113t47 113t113 47t113 -47t47 -113t-47 -113t-113 -47zM608 384q0 -40 -28 -68t-68 -28t-68 28t-28 68t28 68t68 28t68 -28
+t28 -68z" />
   </font>
 </defs></svg>
