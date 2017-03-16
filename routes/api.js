@@ -16,13 +16,37 @@ router.get('/getBanner', function(req, res, next) {
 
 router.get('/getItemList', function(req, res, next) {
   var pageNum = req.query.pageNum && req.query.pageNum > 0 ? parseInt(req.query.pageNum) : 1;
-  Model('Item').find({}).sort({ fowllerNum: -1 }).skip((pageNum - 1) * 10).limit(10).exec(function(err, items) {
-    if (items.length) {
-      res.json({ myData: items, status: true });
-    } else {
-      res.json({ myData: items, status: false });
+  if (req.query.type == 'favor') {
+    if (!req.session.user) {
+      return res.json({ status: false });
     }
-  })
+    Model('User').findOne({ name: req.session.user.name }, (err, user) => {
+      if (user.itemId.length) {
+        let arr = user.itemId.map((item) => {
+          return { id: item }
+        })
+        Model('Item').find({ $or: arr }).skip((pageNum - 1) * 10).limit(10).exec(function(err, items) {
+          if (items.length) {
+            return res.json({ myData: items, status: true });
+          } else {
+            return res.json({ myData: items, status: false });
+          }
+        })
+      } else {
+        return res.json({ status: false });
+      }
+
+    })
+  } else {
+    Model('Item').find({}).sort({ fowllerNum: -1 }).skip((pageNum - 1) * 10).limit(10).exec(function(err, items) {
+      if (items.length) {
+        res.json({ myData: items, status: true });
+      } else {
+        res.json({ myData: items, status: false });
+      }
+    })
+  }
+
 });
 
 router.post('/postLogin', function(req, res) {
@@ -42,6 +66,11 @@ router.post('/postLogin', function(req, res) {
   })
 });
 
+router.get('/logout', function(req, res) {
+  req.session.user = null;
+  res.json({ "myData": { status: false, error: '退出登录成功' } })
+});
+
 router.get('/getCategoryData', function(req, res, next) {
   Model('Category').find({}).sort({ id: 1 }).exec(function(err, category) {
     if (category.length) {
@@ -55,6 +84,7 @@ router.get('/getCategoryData', function(req, res, next) {
 router.get('/getItemContent', function(req, res, next) {
   Model('Item').find({ id: req.query.id }, function(err, content) {
     content[0].fowllerFlag = false
+    console.log(req.session.user)
     if (req.session.user) {
       Model('User').findOne({ name: req.session.user.name }, function(err, user) {
         if (user.itemId.length && user.itemId.includes(req.query.id)) {
