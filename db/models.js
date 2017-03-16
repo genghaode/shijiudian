@@ -3,7 +3,8 @@ var mongoose = require('mongoose');
 module.exports = {
   User: {
     pwd: { type: String, required: true },
-    name: { type: String, required: true }
+    name: { type: String, required: true },
+    itemId: { type: Array }
   },
   Item: {
     id: { type: Number, required: true },
@@ -11,6 +12,8 @@ module.exports = {
     fowllerNum: { type: Number, required: true },
     time: { type: String, required: true },
     img: { type: String, required: true },
+    content: { type: String, require: true },
+    fowllerFlag: { type: Boolean, require: true }
   },
   Banner: {
     id: { type: Number, required: true },

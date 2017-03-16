@@ -30,7 +30,6 @@ router.post('/postLogin', function(req, res) {
   user.pwd = myUtil.md5(user.pwd);
 
   Model('User').findOne(user, function(err, user) {
-    console.log(user)
     if (err) {
       return res.json({ "myData": { status: false, error: '登录失败' } });
     }
@@ -50,6 +49,41 @@ router.get('/getCategoryData', function(req, res, next) {
     } else {
       res.json({ myData: category, status: false });
     }
+  })
+});
+
+router.get('/getItemContent', function(req, res, next) {
+  Model('Item').find({ id: req.query.id }, function(err, content) {
+    content[0].fowllerFlag = false
+    if (req.session.user) {
+      Model('User').findOne({ name: req.session.user.name }, function(err, user) {
+        if (user.itemId.length && user.itemId.includes(req.query.id)) {
+          content[0].fowllerFlag = true
+        }
+        res.json({ myData: content, status: true });
+      })
+    } else {
+      res.json({ myData: content, status: false });
+    }
+  })
+});
+
+router.get('/getFowllerFlag', myUtil.checkLogin, function(req, res, next) {
+  if (!req.session.user) {
+    return res.json({ myData: { 'fowllerFlag': false } });
+  }
+  Model('User').findOne({ name: req.session.user.name }, function(err, user) {
+    let flag = false;
+    let obj = {}
+    if (user.itemId.length && user.itemId.includes(req.query.id)) {
+      obj = { $pull: { 'itemId': req.query.id } }
+    } else {
+      flag = true
+      obj = { $push: { 'itemId': req.query.id } }
+    }
+    Model('User').update({ name: req.session.user.name }, obj, function(err, user) {
+      res.json({ myData: { 'fowllerFlag': flag } });
+    })
   })
 });
 
