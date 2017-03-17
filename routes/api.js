@@ -16,7 +16,8 @@ router.get('/getBanner', function(req, res, next) {
 
 router.get('/getItemList', function(req, res, next) {
   var pageNum = req.query.pageNum && req.query.pageNum > 0 ? parseInt(req.query.pageNum) : 1;
-  if (req.query.type == 'favor') {
+  const { type, id } = req.query
+  if (type == 'favor') {
     if (!req.session.user) {
       return res.json({ status: false });
     }
@@ -36,6 +37,15 @@ router.get('/getItemList', function(req, res, next) {
         return res.json({ status: false });
       }
 
+    })
+  } else if (type == 'search') {
+    const re = new RegExp(id, 'ig')
+    Model('Item').find({ title: re }).sort({ fowllerNum: -1 }).skip((pageNum - 1) * 10).limit(10).exec(function(err, items) {
+      if (items.length) {
+        res.json({ myData: items, status: true });
+      } else {
+        res.json({ myData: items, status: false });
+      }
     })
   } else {
     Model('Item').find({}).sort({ fowllerNum: -1 }).skip((pageNum - 1) * 10).limit(10).exec(function(err, items) {
