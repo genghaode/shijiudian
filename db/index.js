@@ -2,6 +2,7 @@ var mongoose = require('mongoose'),
   Schema = mongoose.Schema,
   models = require('./models')
 
+mongoose.Promise = global.Promise
 mongoose.connect(require('../settings').url)
 
 var UserSchema = new Schema(models.User, { collection: 'user' })
