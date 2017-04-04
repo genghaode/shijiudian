@@ -1,130 +1,307 @@
-var express = require('express');
-var router = express.Router();
+var express = require('express')
+var router = express.Router()
+var uuid = require('uuid')
 
-var Model = require('../db');
-var myUtil = require('../utils');
+var Model = require('../db')
+var myUtil = require('../utils')
 
-router.get('/getBanner', function(req, res, next) {
+router.get('/token', function(req, res, next) {
+  var token = uuid.v4()
+  Token.create({ token, expire: myUtil.AfterOneHour() })
+  res.json({
+    code: 0,
+    errorMessage: '',
+    data: null,
+    token: token
+  })
+})
+
+router.get('/banner', function(req, res, next) {
   Model('Banner').find({}).sort({ id: 1 }).exec(function(err, banners) {
     if (banners.length) {
-      res.json({ myData: banners, status: true });
+      res.json({
+        code: 0,
+        errorMessage: '',
+        data: banners,
+      })
     } else {
-      res.json({ myData: banners, status: false });
+      res.json({
+        code: 1000,
+        errorMessage: '轮播图数据为空',
+        data: null,
+      })
     }
   })
-});
+})
 
-router.get('/getItemList', function(req, res, next) {
-  var pageNum = req.query.pageNum && req.query.pageNum > 0 ? parseInt(req.query.pageNum) : 1;
-  const { type, id } = req.query
-  if (type == 'favor') {
+router.get('/item', function(req, res, next) {
+  var start = req.query.start && req.query.start > 0 ? parseInt(req.query.start) : 1
+  var take = req.query.take && req.query.take > 0 ? parseInt(req.query.take) : 10
+  var type = req.query.type
+  var key = req.query.key
+
+  if (type == 'collection') {
     if (!req.session.user) {
-      return res.json({ status: false });
+      return res.json({
+        code: 1000,
+        errorMessage: '没有登录',
+        data: null,
+      })
     }
-    Model('User').findOne({ name: req.session.user.name }, (err, user) => {
-      if (user.itemId.length) {
-        let arr = user.itemId.map((item) => {
-          return { id: item }
+
+    Model('Collection').find({ user: req.session.user.id }, (err, collections) => {
+      if (collections.length) {
+        let arr = collections.map((data) => {
+          return { id: data.item }
         })
-        Model('Item').find({ $or: arr }).skip((pageNum - 1) * 10).limit(10).exec(function(err, items) {
+        Model('Item').find({ $or: arr }).skip((start - 1) * take).limit(take).exec(function(err, items) {
           if (items.length) {
-            return res.json({ myData: items, status: true });
+            return res.json({
+              code: 0,
+              errorMessage: '',
+              data: {
+                items: items,
+                total: arr.length
+              }
+            })
           } else {
-            return res.json({ myData: items, status: false });
+            return res.json({
+              code: 0,
+              errorMessage: '没有数据了',
+              data: {
+                items: null,
+                total: arr.length
+              }
+            })
           }
         })
       } else {
-        return res.json({ status: false });
+        return res.json({
+          code: 0,
+          errorMessage: '没有数据了',
+          data: {
+            items: null,
+            total: 0
+          }
+        })
       }
 
     })
   } else if (type == 'search') {
-    const re = new RegExp(id, 'ig')
-    Model('Item').find({ title: re }).sort({ fowllerNum: -1 }).skip((pageNum - 1) * 10).limit(10).exec(function(err, items) {
-      if (items.length) {
-        res.json({ myData: items, status: true });
+    const re = new RegExp(key, 'ig')
+    Model('Item').count({ title: re }, function(err, count) {
+      Model('Item').find({ title: re }).sort({ id: -1 }).skip((start - 1) * take).limit(take).exec(function(err, items) {
+        if (items.length) {
+          res.json({
+            code: 0,
+            errorMessage: '',
+            data: {
+              items: items,
+              total: count
+            }
+          })
+        } else {
+          res.json({
+            code: 0,
+            errorMessage: '没有数据了',
+            data: {
+              items: null,
+              total: count
+            }
+          })
+        }
+      })
+    })
+  } else if (type == 'category') {
+    Model('Item').count({ category: key }, function(err, count) {
+      if (count) {
+        Model('Item').find({ category: key }).sort({ id: -1 }).skip((start - 1) * take).limit(take).exec(function(err, items) {
+          if (items.length) {
+            res.json({
+              code: 0,
+              errorMessage: '',
+              data: {
+                items: items,
+                total: count
+              }
+            })
+          } else {
+            res.json({
+              code: 0,
+              errorMessage: '没有数据了',
+              data: {
+                items: null,
+                total: count
+              }
+            })
+          }
+        })
       } else {
-        res.json({ myData: items, status: false });
+        res.json({
+          code: 0,
+          errorMessage: '没有数据了',
+          data: {
+            items: null,
+            total: count
+
+          }
+        })
       }
+
     })
   } else {
-    Model('Item').find({}).sort({ fowllerNum: -1 }).skip((pageNum - 1) * 10).limit(10).exec(function(err, items) {
-      if (items.length) {
-        res.json({ myData: items, status: true });
-      } else {
-        res.json({ myData: items, status: false });
+    Model('Item').count({}, function(err, count) {
+      if (count) {
+        Model('Item').find({}).sort({ id: -1 }).skip((start - 1) * take).limit(take).exec(function(err, items) {
+          if (items.length) {
+            res.json({
+              code: 0,
+              errorMessage: '',
+              data: {
+                items: items,
+                total: count
+              }
+            })
+          } else {
+            res.json({
+              code: 0,
+              errorMessage: '没有数据了',
+              data: {
+                items: null,
+                total: count
+              }
+            })
+          }
+        })
       }
     })
   }
+})
 
-});
+router.get('/login', function(req, res) {
+  var mobile = req.query.mobile
+  var password = myUtil.md5(req.query.password)
 
-router.post('/postLogin', function(req, res) {
-  var user = req.body;
-  user.pwd = myUtil.md5(user.pwd);
-
-  Model('User').findOne(user, function(err, user) {
+  Model('User').findOne({ mobile, password }, function(err, user) {
     if (err) {
-      return res.json({ "myData": { status: false, error: '登录失败' } });
+      return res.json({
+        code: 1000,
+        data: null,
+        errorMessage: '登录失败',
+      })
     }
     if (user) {
-      req.session.user = user;
-      return res.json({ "myData": { status: true, error: '登录成功' } });
+      req.session.user = user
+      return res.json({
+        code: 0,
+        data: null,
+        errorMessage: '登录成功',
+      })
     } else {
-      return res.json({ "myData": { status: false, error: '用户名或密码不正确' } });
+      return res.json({
+        code: 1000,
+        data: null,
+        errorMessage: '用户或密码不正确',
+      })
     }
   })
-});
+})
 
 router.get('/logout', function(req, res) {
   req.session.user = null;
-  res.json({ "myData": { status: false, error: '退出登录成功' } })
-});
+  res.json({
+    code: 0,
+    data: null,
+    errorMessage: '退出成功',
+  })
+})
 
-router.get('/getCategoryData', function(req, res, next) {
+router.get('/category', function(req, res, next) {
   Model('Category').find({}).sort({ id: 1 }).exec(function(err, category) {
     if (category.length) {
-      res.json({ myData: category, status: true });
-    } else {
-      res.json({ myData: category, status: false });
-    }
-  })
-});
-
-router.get('/getItemContent', function(req, res, next) {
-  Model('Item').find({ id: req.query.id }, function(err, content) {
-    content[0].fowllerFlag = false
-    console.log(req.session.user)
-    if (req.session.user) {
-      Model('User').findOne({ name: req.session.user.name }, function(err, user) {
-        if (user.itemId.length && user.itemId.includes(req.query.id)) {
-          content[0].fowllerFlag = true
-        }
-        res.json({ myData: content, status: true });
+      res.json({
+        code: 0,
+        data: category,
+        errorMessage: '',
       })
     } else {
-      res.json({ myData: content, status: false });
+      res.json({
+        code: 1000,
+        data: null,
+        errorMessage: '没有分类数据',
+      })
     }
   })
-});
+})
 
-router.get('/getFowllerFlag', myUtil.checkLogin, function(req, res, next) {
-  if (!req.session.user) {
-    return res.json({ myData: { 'fowllerFlag': false } });
-  }
-  Model('User').findOne({ name: req.session.user.name }, function(err, user) {
-    let flag = false;
-    let obj = {}
-    if (user.itemId.length && user.itemId.includes(req.query.id)) {
-      obj = { $pull: { 'itemId': req.query.id } }
+router.get('/itemView', function(req, res, next) {
+  Model('Item').findOne({ id: req.query.key }, function(err, item) {
+    if (item) {
+      if (req.session.user) {
+        Model('Collection').findOne({ user: req.session.user.id, item: item.id }, function(err, ret) {
+          if (ret) {
+            item.isCollection = true
+            res.json({
+              code: 0,
+              data: item,
+              errorMessage: '',
+            })
+          } else {
+            item.isCollection = false
+            res.json({
+              code: 0,
+              data: item,
+              errorMessage: '',
+            })
+          }
+        })
+      } else {
+        item.isCollection = false
+        res.json({
+          code: 0,
+          data: item,
+          errorMessage: '',
+        })
+      }
     } else {
-      flag = true
-      obj = { $push: { 'itemId': req.query.id } }
+      res.json({
+        code: 1000,
+        data: null,
+        errorMessage: '没有数据',
+      })
     }
-    Model('User').update({ name: req.session.user.name }, obj, function(err, user) {
-      res.json({ myData: { 'fowllerFlag': flag } });
-    })
   })
-});
+})
 
-module.exports = router;
+router.put('/collection', myUtil.checkLogin, function(req, res, next) {
+  if (!req.session.user) {
+    return res.json({
+      code: 1000,
+      data: null,
+      errorMessage: '没有登录',
+    })
+  }
+
+  Model('Collection').findOne({ user: req.session.user.id, item: req.query.key }, function(err, collection) {
+    if (collection) {
+      Model('Collection').remove({ id: collection.id }, function(err, collection) {
+        res.json({
+          code: 0,
+          data: { isCollection: false },
+          errorMessage: '',
+        })
+      })
+    } else {
+      Model('Collection').create({ user: req.session.user.id, item: req.query.key }, function(err, collection) {
+        console.log(collection)
+        res.json({
+          code: 0,
+          data: { isCollection: true },
+          errorMessage: '',
+        })
+      })
+    }
+  })
+})
+
+module.exports = router

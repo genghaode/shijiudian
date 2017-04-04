@@ -1,14 +1,46 @@
 var mongoose = require('mongoose'),
   Schema = mongoose.Schema,
-  models = require('./models');
+  models = require('./models')
 
-mongoose.connect(require('../settings').url);
+mongoose.connect(require('../settings').url)
 
-mongoose.model('User', new Schema(models.User));
-mongoose.model('Item', new Schema(models.Item));
-mongoose.model('Banner', new Schema(models.Banner));
-mongoose.model('Category', new Schema(models.Category));
+var UserSchema = new Schema(models.User, { collection: 'user' })
+UserSchema.pre('save', function(next) {
+  this.id = this._id
+  next()
+})
+mongoose.model('User', UserSchema)
+
+mongoose.model('Token', new Schema(models.Token, { collection: 'token' }))
+
+var ItemSchema = new Schema(models.Item, { collection: 'item' })
+ItemSchema.pre('save', function(next) {
+  this.id = this._id
+  next()
+})
+mongoose.model('Item', ItemSchema)
+
+var CategorySchema = new Schema(models.Category, { collection: 'category' })
+CategorySchema.pre('save', function(next) {
+  this.id = this._id
+  next()
+})
+mongoose.model('Category', CategorySchema)
+
+var CollectionSchema = new Schema(models.Collection, { collection: 'collection' })
+CollectionSchema.pre('save', function(next) {
+  this.id = this._id
+  next()
+})
+mongoose.model('Collection', CollectionSchema)
+
+var BannerSchema = new Schema(models.Banner, { collection: 'banner' })
+BannerSchema.pre('save', function(next) {
+  this.id = this._id
+  next()
+})
+mongoose.model('Banner', BannerSchema)
 
 module.exports = function(type) {
-  return mongoose.model(type);
-};
+  return mongoose.model(type)
+}

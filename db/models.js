@@ -1,28 +1,43 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
+var ObjectId = mongoose.Schema.Types.ObjectId
 
 module.exports = {
   User: {
-    pwd: { type: String, required: true },
-    name: { type: String, required: true },
-    itemId: { type: Array }
+    id: { type: ObjectId, required: false },
+    mobile: { type: String },
+    password: { type: String },
+    name: { type: String },
+    avatar: { type: String },
+  },
+  Token: {
+    id: { type: String },
+    user: { type: ObjectId, ref: 'User' },
+    token: { type: String },
+    expire: { type: Date },
   },
   Item: {
-    id: { type: Number, required: true },
-    title: { type: String, required: true },
-    fowllerNum: { type: Number, required: true },
-    time: { type: String, required: true },
-    img: { type: String, required: true },
-    content: { type: String, require: true },
-    fowllerFlag: { type: Boolean, require: true }
-  },
-  Banner: {
-    id: { type: Number, required: true },
-    img: { type: String, required: true },
-    url: { type: String }
+    id: { type: ObjectId, required: false },
+    category: { type: ObjectId, ref: 'Category' },
+    title: { type: String },
+    author: { type: String },
+    content: { type: [String] },
+    create_time: { type: Date, default: Date.now },
+    image: { type: String },
   },
   Category: {
-    id: { type: Number, required: true },
-    text: { type: String, required: true },
-    icon: { type: String, required: true }
-  }
-};
+    id: { type: ObjectId, required: false },
+    name: { type: String },
+    image: { type: String },
+  },
+  Collection: {
+    id: { type: ObjectId, required: false },
+    item: { type: ObjectId, ref: 'Item' },
+    user: { type: ObjectId, ref: 'User' },
+  },
+  Banner: {
+    id: { type: ObjectId, required: false },
+    weight: { type: String, default: 0 },
+    image: { type: String },
+    url: { type: String },
+  },
+}
